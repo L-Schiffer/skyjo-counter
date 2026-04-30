@@ -4,6 +4,14 @@ const bcrypt = require("bcryptjs");
 const Database = require("better-sqlite3");
 const path = require("path");
 
+// C-1: Fail fast on missing or default secrets
+const SESSION_SECRET = process.env.SESSION_SECRET;
+const KNOWN_BAD = ["bitte-aendern-zufallsstring", "skyjo-secret-change-me", undefined, ""];
+if (KNOWN_BAD.includes(SESSION_SECRET)) {
+  console.error("FATAL: SESSION_SECRET is missing or uses a known default. Set a random hex string in .env.");
+  process.exit(1);
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DB_PATH = path.join(process.env.DB_DIR || "./data", "skyjo.db");
@@ -52,7 +60,11 @@ db.exec(`
 
 // Seed admin user
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
-const ADMIN_PASS = process.env.ADMIN_PASS || "changeme123";
+const ADMIN_PASS = process.env.ADMIN_PASS;
+if (!ADMIN_PASS) {
+  console.error("FATAL: ADMIN_PASS is not set in .env.");
+  process.exit(1);
+}
 const existing = db.prepare("SELECT id FROM users WHERE username = ?").get(ADMIN_USER);
 if (!existing) {
   const hash = bcrypt.hashSync(ADMIN_PASS, 10);
@@ -61,21 +73,37 @@ if (!existing) {
 }
 
 // ── Middleware ──
+app.set("trust proxy", 1);
 app.use(express.json());
+
+// H-2: CSRF — cross-origin requests cannot set custom headers without a CORS preflight
+app.use((req, res, next) => {
+  if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next();
+  if (req.headers["x-requested-with"] !== "XMLHttpRequest") {
+    return res.status(403).json({ error: "CSRF check failed" });
+  }
+  next();
+});
+
 app.use(session({
-  secret: process.env.SESSION_SECRET || "skyjo-secret-change-me",
+  secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 30 * 24 * 60 * 60 * 1000, sameSite: "lax" }
+  // H-1: httpOnly blocks JS access; secure requires HTTPS (set up at reverse proxy)
+  cookie: { maxAge: 8 * 60 * 60 * 1000, sameSite: "lax", httpOnly: true, secure: process.env.NODE_ENV === "production" }
 }));
 
 function requireAuth(req, res, next) {
   if (req.session?.userId) return next();
   res.status(401).json({ error: "Nicht eingeloggt" });
 }
+
+// H-5: Re-validate admin from DB on every admin request
 function requireAdmin(req, res, next) {
-  if (req.session?.isAdmin) return next();
-  res.status(403).json({ error: "Kein Admin" });
+  if (!req.session?.userId) return res.status(403).json({ error: "Kein Admin" });
+  const user = db.prepare("SELECT is_admin FROM users WHERE id = ?").get(req.session.userId);
+  if (!user?.is_admin) return res.status(403).json({ error: "Kein Admin" });
+  next();
 }
 
 // ── Auth Routes ──
@@ -83,12 +111,16 @@ app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
   const user = db.prepare("SELECT * FROM users WHERE username = ?").get(username);
   if (!user || !bcrypt.compareSync(password, user.password)) return res.status(401).json({ error: "Ungültige Anmeldedaten" });
-  req.session.userId = user.id;
-  req.session.username = user.username;
-  req.session.isAdmin = !!user.is_admin;
-  res.json({ username: user.username, isAdmin: !!user.is_admin });
+  // Regenerate session ID to prevent session fixation
+  req.session.regenerate(err => {
+    if (err) return res.status(500).json({ error: "Session error" });
+    req.session.userId = user.id;
+    req.session.username = user.username;
+    req.session.isAdmin = !!user.is_admin;
+    res.json({ username: user.username, isAdmin: !!user.is_admin });
+  });
 });
-app.post("/api/logout", (req, res) => { req.session.destroy(); res.json({ ok: true }); });
+app.post("/api/logout", (req, res) => { req.session.destroy(() => res.json({ ok: true })); });
 app.get("/api/me", (req, res) => {
   if (!req.session?.userId) return res.json(null);
   res.json({ username: req.session.username, isAdmin: req.session.isAdmin });

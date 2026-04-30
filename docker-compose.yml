@@ -7,11 +7,7 @@ services:
       - "3200:3000"
     volumes:
       - skyjo-data:/app/data
-    environment:
-      - ADMIN_USER=admin
-      - ADMIN_PASS=changeme123
-      - SESSION_SECRET=bitte-aendern-zufallsstring
-      - PORT=3000
+    env_file: .env
 
 volumes:
   skyjo-data:

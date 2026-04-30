@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Skyjo Rechner</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:linear-gradient(to bottom,#fafaf9,#f5f5f4);min-height:100vh;color:#1c1917}
+  .container{max-width:480px;margin:0 auto;padding:16px 16px 80px}
+  h1.logo{font-family:'Fraunces',serif;font-size:2.2rem;font-weight:800;text-align:center;color:#1c1917;letter-spacing:-0.02em}
+  h2.section{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:700;color:#1c1917;margin-bottom:12px}
+  .subtitle{text-align:center;color:#78716c;font-size:.9rem;margin-top:4px}
+  .card{background:rgba(255,255,255,.8);backdrop-filter:blur(8px);border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid rgba(214,211,209,.6);padding:20px;margin-bottom:16px}
+  input[type=text],input[type=password],input[type=number]{width:100%;padding:12px 16px;border:1px solid #d6d3d1;border-radius:12px;font-size:.9rem;background:#fafaf9;outline:none;font-family:inherit;transition:border .2s}
+  input:focus{border-color:#34d399;box-shadow:0 0 0 3px rgba(52,211,153,.2)}
+  input[type=number]{width:72px;text-align:right;padding:10px 12px}
+  button{font-family:inherit;cursor:pointer;border:none;transition:all .15s;-webkit-tap-highlight-color:transparent}
+  button:active{transform:scale(.96)}
+  .btn-primary{background:#059669;color:#fff;padding:12px 20px;border-radius:12px;font-weight:600;font-size:.9rem;width:100%;box-shadow:0 1px 3px rgba(5,150,105,.3)}
+  .btn-primary:hover{background:#047857}
+  .btn-primary:disabled{background:#d6d3d1;box-shadow:none;cursor:default;transform:none}
+  .btn-secondary{background:#e7e5e4;color:#44403c;padding:10px 16px;border-radius:12px;font-weight:600;font-size:.85rem}
+  .btn-danger{background:#fef2f2;color:#dc2626;border:1px solid #fecaca;padding:10px 16px;border-radius:12px;font-weight:600;font-size:.85rem}
+  .btn-dark{background:#1c1917;color:#fff;padding:12px 20px;border-radius:12px;font-weight:600;font-size:.9rem;width:100%}
+  .btn-sm{padding:8px 12px;font-size:.8rem;border-radius:10px}
+  .btn-icon{background:#059669;color:#fff;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .row{display:flex;align-items:center;gap:8px}
+  .flex-1{flex:1;min-width:0}
+  .list-item{display:flex;align-items:center;justify-content:space-between;background:#fafaf9;padding:10px 16px;border-radius:12px;margin-bottom:8px}
+  .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .badge{font-size:.7rem;font-weight:700;padding:4px 10px;border-radius:999px}
+  .badge-green{background:#ecfdf5;color:#059669}
+  .badge-amber{background:#fffbeb;color:#b45309}
+  .back-btn{background:none;color:#78716c;font-size:.85rem;display:flex;align-items:center;gap:4px;margin-bottom:12px;padding:4px 0}
+  .flag-btn{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;transition:all .2s}
+  .flag-btn.active{background:#fbbf24;color:#92400e;box-shadow:0 1px 4px rgba(251,191,36,.4);transform:scale(1.08)}
+  .flag-btn.inactive{background:#f5f5f4;color:#a8a29e}
+  .progress-bar{height:6px;background:#f5f5f4;border-radius:99px;overflow:hidden;margin-top:4px}
+  .progress-fill{height:100%;border-radius:99px;transition:width .4s ease}
+  .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+  .kpi{text-align:center;padding:14px 8px}
+  .kpi-val{font-size:1.4rem;font-weight:700;color:#1c1917}
+  .kpi-label{font-size:.7rem;color:#78716c;margin-top:2px}
+  table{width:100%;font-size:.75rem;border-collapse:collapse}
+  th{text-align:right;padding:6px 4px;color:#78716c;font-weight:500;border-bottom:1px solid #e7e5e4}
+  th:first-child{text-align:left}
+  td{text-align:right;padding:6px 4px;border-bottom:1px solid #f5f5f4;font-weight:500}
+  td:first-child{text-align:left;color:#a8a29e}
+  tr.total-row{font-weight:700}
+  tr.total-row td{border-bottom:none;padding-top:8px}
+  .doubled{color:#dc2626}
+  .game-over-card{background:rgba(255,251,235,.8);border-color:#fcd34d;text-align:center;padding:24px 20px}
+  .winner-text{font-size:1.1rem;font-weight:700;color:#92400e}
+  .hidden{display:none}
+  .tab-bar{display:flex;gap:4px;margin-bottom:16px;background:#e7e5e4;padding:4px;border-radius:14px}
+  .tab{flex:1;text-align:center;padding:10px 8px;border-radius:10px;font-size:.85rem;font-weight:600;color:#78716c;background:transparent}
+  .tab.active{background:#fff;color:#1c1917;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .standing-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .rank{font-size:.75rem;font-weight:700;color:#d6d3d1;width:16px;text-align:center}
+  .standing-name{font-size:.9rem;font-weight:500;color:#1c1917}
+  .standing-score{font-size:.9rem;font-weight:700;margin-left:auto}
+  .score-red{color:#dc2626}
+  .lb-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #f5f5f4}
+  .lb-row:last-child{border:none}
+  .lb-rank{font-size:1.1rem;font-weight:700;color:#d6d3d1;width:24px}
+  .lb-name{font-weight:600;font-size:.9rem;color:#1c1917}
+  .lb-meta{font-size:.75rem;color:#78716c}
+  .game-list-item{display:flex;align-items:center;justify-content:space-between;background:#fafaf9;padding:12px 16px;border-radius:12px;margin-bottom:8px;width:100%;text-align:left}
+  .game-list-item:hover{background:#f5f5f4}
+  .hint{font-size:.75rem;color:#d97706;display:flex;align-items:center;gap:4px;margin-top:8px}
+  .input-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .input-name{flex:1;font-size:.9rem;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .chart-container{width:100%;height:200px;position:relative;margin-top:8px}
+  .bar-chart{display:flex;align-items:flex-end;gap:6px;height:160px;padding-top:20px}
+  .bar-wrapper{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .bar{width:100%;border-radius:6px 6px 0 0;transition:height .4s ease;min-height:4px}
+  .bar-label{font-size:.7rem;font-weight:600;color:#1c1917}
+  .bar-name{font-size:.65rem;color:#78716c;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+  .pie-chart{display:flex;align-items:center;justify-content:center;gap:20px;padding:12px 0}
+  .pie-legend{display:flex;flex-direction:column;gap:6px}
+  .pie-legend-item{display:flex;align-items:center;gap:6px;font-size:.8rem}
+  .user-row{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#fafaf9;border-radius:12px;margin-bottom:8px}
+  .user-info{display:flex;flex-direction:column}
+  .user-name{font-weight:600;font-size:.9rem}
+  .user-meta{font-size:.75rem;color:#78716c}
+  .user-actions{display:flex;gap:6px}
+  /* ── Modal ── */
+  .modal-overlay{position:fixed;inset:0;background:rgba(28,25,23,.55);display:flex;align-items:center;justify-content:center;z-index:1000;padding:24px;backdrop-filter:blur(4px);animation:fadeIn .15s ease}
+  .modal-overlay.hidden{display:none}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .modal-box{background:#fff;border-radius:20px;padding:24px;max-width:340px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.18);animation:slideUp .18s ease}
+  @keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .modal-title{font-family:'Fraunces',serif;font-size:1.1rem;font-weight:700;color:#1c1917;margin-bottom:8px}
+  .modal-msg{font-size:.9rem;color:#44403c;line-height:1.5;margin-bottom:20px}
+  .modal-actions{display:flex;gap:8px}
+  .modal-actions button{flex:1}
+</style>
+</head>
+<body>
+
+<div class="container" id="app"></div>
+
+<div class="modal-overlay hidden" id="modal" onclick="if(event.target===this)_modalDismiss()">
+  <div class="modal-box" id="modal-box"></div>
+</div>
+
+<script>
+const COLORS = ["#059669","#d97706","#dc2626","#7c3aed","#0891b2","#db2777","#65a30d","#ea580c"];
+let state = { view: "login", user: null, players: [], games: [], users: [], activeGame: null, gameRounds: [], currentScores: {}, enderId: null, detailGame: null, gameTab: "play", adminTab: "players" };
+
+// ── Modal ──
+let _modalResolve = null;
+
+function _modalDismiss() { _modalClose(null); }
+
+function _modalClose(val) {
+  document.getElementById("modal").classList.add("hidden");
+  if (_modalResolve) { _modalResolve(val); _modalResolve = null; }
+}
+
+function showConfirm(title, message, confirmText = "Löschen", cancelText = "Abbrechen") {
+  return new Promise(resolve => {
+    _modalResolve = resolve;
+    document.getElementById("modal-box").innerHTML = `
+      <div class="modal-title">${title}</div>
+      <p class="modal-msg">${message}</p>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="_modalClose(false)">${cancelText}</button>
+        <button class="btn-danger" onclick="_modalClose(true)">${confirmText}</button>
+      </div>`;
+    document.getElementById("modal").classList.remove("hidden");
+  });
+}
+
+function showAlert(message, title = "Hinweis") {
+  return new Promise(resolve => {
+    _modalResolve = resolve;
+    document.getElementById("modal-box").innerHTML = `
+      <div class="modal-title">${title}</div>
+      <p class="modal-msg">${message}</p>
+      <div class="modal-actions">
+        <button class="btn-primary" onclick="_modalClose(true)">OK</button>
+      </div>`;
+    document.getElementById("modal").classList.remove("hidden");
+  });
+}
+
+function showPrompt(title, placeholder = "") {
+  return new Promise(resolve => {
+    _modalResolve = resolve;
+    document.getElementById("modal-box").innerHTML = `
+      <div class="modal-title">${title}</div>
+      <input type="password" id="modal-input" placeholder="${placeholder}" style="margin-bottom:14px" onkeydown="if(event.key==='Enter')_modalPromptSubmit()">
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="_modalClose(null)">Abbrechen</button>
+        <button class="btn-primary" onclick="_modalPromptSubmit()">Übernehmen</button>
+      </div>`;
+    document.getElementById("modal").classList.remove("hidden");
+    setTimeout(() => document.getElementById("modal-input")?.focus(), 50);
+  });
+}
+
+function _modalPromptSubmit() {
+  const val = document.getElementById("modal-input").value;
+  _modalClose(val || null);
+}
+
+// ── API ──
+async function api(method, url, body) {
+  const opts = { method, headers: { "Content-Type": "application/json" }, credentials: "same-origin" };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(url, opts);
+  if (r.status === 401 && url !== "/api/login" && url !== "/api/me") { state.view = "login"; state.user = null; render(); return null; }
+  return r.json();
+}
+
+async function init() {
+  const me = await api("GET", "/api/me");
+  if (me) { state.user = me; state.view = "home"; await loadData(); }
+  render();
+}
+
+async function loadData() {
+  state.players = await api("GET", "/api/players") || [];
+  state.games = await api("GET", "/api/games") || [];
+  if (state.user?.isAdmin) state.users = await api("GET", "/api/users") || [];
+}
+
+// ── Render ──
+function render() {
+  const app = document.getElementById("app");
+  switch (state.view) {
+    case "login": app.innerHTML = loginView(); break;
+    case "home": app.innerHTML = homeView(); break;
+    case "game": app.innerHTML = gameView(); break;
+    case "analytics": app.innerHTML = analyticsView(); break;
+    case "detail": app.innerHTML = detailView(); break;
+    case "admin": app.innerHTML = adminView(); break;
+    default: app.innerHTML = loginView();
+  }
+}
+
+// ── Login ──
+function loginView() {
+  return `
+    <div style="padding-top:25vh">
+      <h1 class="logo">Skyjo</h1>
+      <p class="subtitle">Bitte einloggen</p>
+      <div class="card" style="margin-top:24px">
+        <input type="text" id="login-user" placeholder="Username" style="margin-bottom:10px">
+        <input type="password" id="login-pass" placeholder="Passwort" style="margin-bottom:14px">
+        <button class="btn-primary" onclick="doLogin()">Anmelden</button>
+        <p id="login-error" style="color:#dc2626;font-size:.8rem;margin-top:8px;text-align:center"></p>
+      </div>
+    </div>`;
+}
+
+async function doLogin() {
+  const u = document.getElementById("login-user").value;
+  const p = document.getElementById("login-pass").value;
+  const res = await api("POST", "/api/login", { username: u, password: p });
+  if (res?.error) { document.getElementById("login-error").textContent = res.error; return; }
+  if (res?.username) { state.user = res; state.view = "home"; await loadData(); render(); }
+}
+
+async function doLogout() { await api("POST", "/api/logout"); state.user = null; state.view = "login"; render(); }
+
+// ── Home ──
+function homeView() {
+  const finishedGames = state.games.filter(g => g.finished_at);
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;padding-top:8px">
+      <h1 class="logo" style="text-align:left;font-size:1.8rem">Skyjo</h1>
+      <div class="row">
+        ${state.user?.isAdmin ? `<button class="btn-secondary btn-sm" onclick="goAdmin()">⚙️</button>` : ""}
+        <button class="btn-secondary btn-sm" onclick="doLogout()">Logout</button>
+      </div>
+    </div>
+    <p class="subtitle" style="text-align:left;margin-bottom:16px">Hallo, ${esc(state.user?.username)} 👋</p>
+
+    <div class="card">
+      <h2 class="section" style="font-size:1rem;margin-bottom:10px">Spieler auswählen</h2>
+      <div class="row" style="margin-bottom:12px">
+        <input type="text" id="new-player" placeholder="Neuer Spieler…" class="flex-1" onkeydown="if(event.key==='Enter')addPlayer()" style="width:auto">
+        <button class="btn-icon" onclick="addPlayer()">+</button>
+      </div>
+      <div id="player-checks">
+        ${state.players.map((p, i) => `
+          <label class="list-item" style="cursor:pointer;margin-bottom:6px">
+            <div class="row"><div class="dot" style="background:${COLORS[i % COLORS.length]}"></div><span style="font-weight:500;font-size:.9rem;margin-left:4px">${esc(p.name)}</span></div>
+            <input type="checkbox" class="player-check" value="${p.id}" style="width:20px;height:20px;accent-color:#059669">
+          </label>
+        `).join("")}
+      </div>
+      <button class="btn-primary" style="margin-top:12px" onclick="startGame()">Spiel starten</button>
+    </div>
+
+    ${finishedGames.length > 0 ? `<button class="btn-dark" onclick="state.view='analytics';render()">📊 Statistiken (${finishedGames.length} Spiele)</button>` : ""}
+  `;
+}
+
+async function addPlayer() {
+  const inp = document.getElementById("new-player");
+  const name = inp.value.trim();
+  if (!name) return;
+  const res = await api("POST", "/api/players", { name });
+  if (res?.id) { state.players.push(res); inp.value = ""; render(); }
+  else if (res?.error) await showAlert(res.error, "Fehler");
+}
+
+async function deletePlayer(id) {
+  if (!await showConfirm("Spieler löschen", "Diesen Spieler wirklich löschen?")) return;
+  await api("DELETE", `/api/players/${id}`);
+  state.players = state.players.filter(p => p.id !== id);
+  render();
+}
+
+async function startGame() {
+  const checks = document.querySelectorAll(".player-check:checked");
+  const ids = Array.from(checks).map(c => Number(c.value));
+  if (ids.length < 2) { await showAlert("Bitte mindestens 2 Spieler auswählen.", "Hinweis"); return; }
+  const res = await api("POST", "/api/games", { playerIds: ids });
+  if (res?.id) {
+    state.activeGame = { id: res.id, playerIds: ids, players: state.players.filter(p => ids.includes(p.id)) };
+    state.gameRounds = [];
+    state.currentScores = {};
+    state.enderId = null;
+    state.view = "game";
+    render();
+  }
+}
+
+// ── Game ──
+function gameTotals() {
+  const t = {};
+  state.activeGame.players.forEach(p => { t[p.id] = state.gameRounds.reduce((s, r) => s + (r.scores[p.id] || 0), 0); });
+  return t;
+}
+
+function gameView() {
+  const gp = state.activeGame.players;
+  const totals = gameTotals();
+  const sorted = [...gp].sort((a, b) => totals[a.id] - totals[b.id]);
+  const maxPts = Math.max(...Object.values(totals), 1);
+  const over = sorted.some(p => totals[p.id] >= 100);
+
+  const standings = sorted.map((p, i) => {
+    const ci = gp.indexOf(p);
+    const w = Math.max((totals[p.id] / maxPts) * 100, 3);
+    return `<div class="standing-row">
+      <span class="rank">${i + 1}</span>
+      <div class="flex-1">
+        <div style="display:flex;justify-content:space-between"><span class="standing-name">${esc(p.name)}${i === 0 && state.gameRounds.length ? " 👑" : ""}</span><span class="standing-score ${totals[p.id] >= 100 ? "score-red" : ""}">${totals[p.id]}</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${w}%;background:${COLORS[ci % COLORS.length]}"></div></div>
+      </div>
+    </div>`;
+  }).join("");
+
+  const inputs = gp.map(p => {
+    const isEnder = state.enderId === p.id;
+    return `<div class="input-row">
+      <button class="flag-btn ${isEnder ? "active" : "inactive"}" onclick="state.enderId=${p.id};render()">🏁</button>
+      <span class="input-name">${esc(p.name)}</span>
+      <input type="number" inputmode="numeric" id="score-${p.id}" value="${state.currentScores[p.id] ?? ""}" onchange="state.currentScores[${p.id}]=this.value" placeholder="—">
+    </div>`;
+  }).join("");
+
+  const history = state.gameRounds.length ? `
+    <div class="card">
+      <div style="font-weight:600;font-size:.9rem;margin-bottom:8px">Verlauf</div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th style="text-align:left">#</th>${gp.map(p => `<th>${esc(p.name.slice(0, 5))}</th>`).join("")}</tr></thead>
+          <tbody>
+            ${state.gameRounds.map((r, i) => `<tr><td>${i + 1}</td>${gp.map(p => `<td><span class="${r.enderId === p.id && r.doubled ? "doubled" : ""}">${r.scores[p.id]}</span>${r.enderId === p.id ? (r.doubled ? " ⚡" : " 🏁") : ""}</td>`).join("")}</tr>`).join("")}
+            <tr class="total-row"><td>Σ</td>${gp.map(p => `<td>${totals[p.id]}</td>`).join("")}</tr>
+          </tbody>
+        </table>
+      </div>
+    </div>` : "";
+
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-top:4px">
+      <h2 class="section" style="margin:0">Runde ${state.gameRounds.length + 1}</h2>
+      <button class="btn-secondary btn-sm" onclick="finishGame()">Beenden</button>
+    </div>
+    <div class="card"><div style="display:flex;align-items:center;gap:6px;margin-bottom:10px"><span style="font-size:1rem">🏆</span><span style="font-weight:600;font-size:.85rem;color:#44403c">Zwischenstand</span></div>${standings}</div>
+    ${over ? `<div class="card game-over-card"><div style="font-size:2rem;margin-bottom:8px">🏆</div><p class="winner-text">${esc(sorted[0].name)} gewinnt!</p><p style="color:#b45309;font-size:.85rem">${totals[sorted[0].id]} Punkte</p><button class="btn-primary" style="margin-top:14px" onclick="finishGame()">Spiel speichern</button></div>` : `
+    <div class="card">
+      <div style="font-weight:600;font-size:.9rem;margin-bottom:10px">Punkte eintragen</div>
+      ${inputs}
+      ${!state.enderId ? `<div class="hint">🏁 Wer hat die Runde beendet?</div>` : ""}
+      <button class="btn-primary" style="margin-top:10px" onclick="submitRound()">Runde speichern</button>
+    </div>`}
+    ${history}
+  `;
+}
+
+async function submitRound() {
+  const gp = state.activeGame.players;
+  const scores = {};
+  for (const p of gp) {
+    const v = document.getElementById(`score-${p.id}`).value;
+    if (v === "") { await showAlert(`Punkte für ${esc(p.name)} fehlen.`, "Hinweis"); return; }
+    scores[p.id] = Number(v);
+  }
+  if (!state.enderId) { await showAlert("Bitte markieren, wer die Runde beendet hat.", "Hinweis"); return; }
+  const res = await api("POST", `/api/games/${state.activeGame.id}/rounds`, { scores, enderId: state.enderId });
+  if (res?.roundId) {
+    state.gameRounds.push({ scores: res.scores, enderId: state.enderId, doubled: res.doubled });
+    state.currentScores = {};
+    state.enderId = null;
+    render();
+  }
+}
+
+async function finishGame() {
+  const totals = gameTotals();
+  const sorted = [...state.activeGame.players].sort((a, b) => totals[a.id] - totals[b.id]);
+  await api("POST", `/api/games/${state.activeGame.id}/finish`, { winnerId: sorted[0].id });
+  state.activeGame = null;
+  state.gameRounds = [];
+  await loadData();
+  state.view = "home";
+  render();
+}
+
+// ── Analytics ──
+function analyticsView() {
+  const games = state.games.filter(g => g.finished_at);
+  if (!games.length) return `<button class="back-btn" onclick="state.view='home';render()">← Zurück</button><div class="card" style="text-align:center;padding:40px">Noch keine Spiele.</div>`;
+
+  const ps = {};
+  games.forEach(g => {
+    g.players.forEach(p => {
+      if (!ps[p.name]) ps[p.name] = { wins: 0, games: 0, tp: 0, best: Infinity, worst: -Infinity };
+      ps[p.name].games++;
+      const t = g.totals[p.id] || 0;
+      ps[p.name].tp += t;
+      if (t < ps[p.name].best) ps[p.name].best = t;
+      if (t > ps[p.name].worst) ps[p.name].worst = t;
+    });
+    if (g.winner) { if (ps[g.winner]) ps[g.winner].wins++; }
+  });
+  const lb = Object.entries(ps).map(([n, s]) => ({ name: n, ...s, avg: Math.round(s.tp / s.games), wr: Math.round((s.wins / s.games) * 100) })).sort((a, b) => b.wins - a.wins || a.avg - b.avg);
+  const totalRounds = games.reduce((s, g) => s + g.rounds.length, 0);
+  const maxAvg = Math.max(...lb.map(p => p.avg), 1);
+
+  const avgBars = lb.map((p, i) => `
+    <div class="bar-wrapper">
+      <div class="bar-label">${p.avg}</div>
+      <div class="bar" style="height:${Math.max((p.avg / maxAvg) * 140, 8)}px;background:${COLORS[i % COLORS.length]}"></div>
+      <div class="bar-name">${esc(p.name)}</div>
+    </div>`).join("");
+
+  const gameList = games.slice().reverse().map(g => `
+    <button class="game-list-item" onclick="showDetail(${g.id})">
+      <div><div style="font-weight:500;font-size:.85rem">${new Date(g.started_at).toLocaleDateString("de-DE")} · ${g.rounds.length} Runden</div><div style="font-size:.75rem;color:#78716c">${g.players.map(p => p.name).join(", ")}</div></div>
+      <span class="badge badge-amber">🏆 ${esc(g.winner || "?")}</span>
+    </button>`).join("");
+
+  const leaderboard = lb.map((p, i) => `
+    <div class="lb-row">
+      <span class="lb-rank">${i + 1}</span>
+      <div class="dot" style="background:${COLORS[i % COLORS.length]}"></div>
+      <div class="flex-1"><div class="lb-name">${esc(p.name)}</div><div class="lb-meta">${p.wins}× gewonnen · Ø ${p.avg} · Best ${p.best} · ${p.games} Spiele</div></div>
+      <span class="badge badge-green">${p.wr}%</span>
+    </div>`).join("");
+
+  return `
+    <button class="back-btn" onclick="state.view='home';render()">← Zurück</button>
+    <h1 class="logo" style="text-align:left;font-size:1.6rem;margin-bottom:16px">Statistiken</h1>
+    <div class="kpi-grid">
+      <div class="card kpi"><div class="kpi-val">${games.length}</div><div class="kpi-label">Spiele</div></div>
+      <div class="card kpi"><div class="kpi-val">${totalRounds}</div><div class="kpi-label">Runden</div></div>
+      <div class="card kpi"><div class="kpi-val">${lb.length}</div><div class="kpi-label">Spieler</div></div>
+    </div>
+    <div class="card"><div style="font-weight:600;font-size:.9rem;margin-bottom:10px">🏅 Bestenliste</div>${leaderboard}</div>
+    <div class="card"><div style="font-weight:600;font-size:.9rem;margin-bottom:4px">📊 Ø Punkte pro Spiel</div><div class="bar-chart">${avgBars}</div></div>
+    <div class="card"><div style="font-weight:600;font-size:.9rem;margin-bottom:10px">Alle Spiele</div>${gameList}</div>
+  `;
+}
+
+function showDetail(gid) {
+  state.detailGame = state.games.find(g => g.id === gid);
+  state.view = "detail";
+  render();
+}
+
+function detailView() {
+  const g = state.detailGame;
+  if (!g) { state.view = "analytics"; render(); return ""; }
+  const sorted = [...g.players].sort((a, b) => (g.totals[a.id] || 0) - (g.totals[b.id] || 0));
+
+  const cumData = [];
+  g.players.forEach(p => { let s = 0; const pts = []; g.rounds.forEach(r => { s += r.scores[p.id] || 0; pts.push(s); }); cumData.push({ name: p.name, points: pts }); });
+  const maxVal = Math.max(...cumData.flatMap(d => d.points), 1);
+  const numR = g.rounds.length;
+  const W = 320, H = 160, PAD = 30;
+  const lines = cumData.map((d, di) => {
+    const pts = d.points.map((v, i) => `${PAD + (i / Math.max(numR - 1, 1)) * (W - PAD * 2)},${H - PAD - (v / maxVal) * (H - PAD * 2)}`).join(" ");
+    return `<polyline points="${pts}" fill="none" stroke="${COLORS[di % COLORS.length]}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+  }).join("");
+  const legend = cumData.map((d, i) => `<span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px;font-size:.7rem"><span class="dot" style="background:${COLORS[i % COLORS.length]};width:8px;height:8px"></span>${esc(d.name)}</span>`).join("");
+
+  const results = sorted.map((p, i) => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f4;font-size:.9rem"><span>${i + 1}. ${esc(p.name)}${i === 0 ? " 🏆" : ""}</span><span style="font-weight:700">${g.totals[p.id]}</span></div>`).join("");
+
+  return `
+    <button class="back-btn" onclick="state.view='analytics';render()">← Zurück</button>
+    <h2 class="section">Spiel vom ${new Date(g.started_at).toLocaleDateString("de-DE")}</h2>
+    <p style="font-size:.85rem;color:#78716c;margin-bottom:16px">${g.rounds.length} Runden · Gewinner: ${esc(g.winner || "?")} 🏆</p>
+    <div class="card">
+      <div style="font-weight:600;font-size:.9rem;margin-bottom:8px">Punkteverlauf</div>
+      <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">
+        <line x1="${PAD}" y1="${H - PAD}" x2="${W - PAD}" y2="${H - PAD}" stroke="#e7e5e4" stroke-width="1"/>
+        <line x1="${PAD}" y1="${PAD}" x2="${PAD}" y2="${H - PAD}" stroke="#e7e5e4" stroke-width="1"/>
+        <text x="${PAD}" y="${H - 8}" font-size="9" fill="#a8a29e">1</text>
+        <text x="${W - PAD}" y="${H - 8}" font-size="9" fill="#a8a29e" text-anchor="end">${numR}</text>
+        <text x="${PAD - 4}" y="${PAD + 4}" font-size="9" fill="#a8a29e" text-anchor="end">${maxVal}</text>
+        <text x="${PAD - 4}" y="${H - PAD}" font-size="9" fill="#a8a29e" text-anchor="end">0</text>
+        ${lines}
+      </svg>
+      <div style="margin-top:6px">${legend}</div>
+    </div>
+    <div class="card"><div style="font-weight:600;font-size:.9rem;margin-bottom:8px">Ergebnis</div>${results}</div>
+    <button class="btn-danger" style="width:100%" onclick="deleteGame(${g.id})">🗑 Spiel löschen</button>
+  `;
+}
+
+async function deleteGame(id) {
+  if (!await showConfirm("Spiel löschen", "Dieses Spiel wirklich löschen? Alle Runden gehen verloren.", "Löschen")) return;
+  await api("DELETE", `/api/games/${id}`);
+  state.games = state.games.filter(g => g.id !== id);
+  state.view = "analytics";
+  render();
+}
+
+// ── Admin ──
+function goAdmin() { state.adminTab = "players"; state.view = "admin"; render(); }
+
+function adminView() {
+  const tabs = `<div class="tab-bar">
+    <button class="tab ${state.adminTab === "players" ? "active" : ""}" onclick="state.adminTab='players';render()">Spieler</button>
+    <button class="tab ${state.adminTab === "users" ? "active" : ""}" onclick="state.adminTab='users';render()">Benutzer</button>
+  </div>`;
+
+  let content = "";
+  if (state.adminTab === "players") {
+    content = `
+      <div class="row" style="margin-bottom:12px">
+        <input type="text" id="admin-player" placeholder="Neuer Spieler…" class="flex-1" style="width:auto">
+        <button class="btn-icon" onclick="adminAddPlayer()">+</button>
+      </div>
+      ${state.players.map((p, i) => `<div class="list-item"><div class="row"><div class="dot" style="background:${COLORS[i % COLORS.length]}"></div><span style="margin-left:6px;font-weight:500;font-size:.9rem">${esc(p.name)}</span></div><button class="btn-danger btn-sm" onclick="adminDelPlayer(${p.id})">✕</button></div>`).join("")}
+      ${!state.players.length ? `<p style="color:#78716c;font-size:.85rem;text-align:center;padding:20px">Noch keine Spieler.</p>` : ""}
+    `;
+  } else {
+    content = `
+      <div class="card" style="margin-bottom:12px">
+        <div style="font-weight:600;font-size:.85rem;margin-bottom:10px">Neuen Benutzer anlegen</div>
+        <input type="text" id="new-username" placeholder="Username" style="margin-bottom:8px">
+        <input type="password" id="new-userpass" placeholder="Passwort" style="margin-bottom:8px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;margin-bottom:10px"><input type="checkbox" id="new-useradmin" style="accent-color:#059669"> Admin</label>
+        <button class="btn-primary" onclick="adminAddUser()">Benutzer anlegen</button>
+      </div>
+      ${state.users.map(u => `
+        <div class="user-row">
+          <div class="user-info"><span class="user-name">${esc(u.username)} ${u.is_admin ? "👑" : ""}</span><span class="user-meta">ID ${u.id} · ${u.created_at?.slice(0, 10) || ""}</span></div>
+          <div class="user-actions">
+            <button class="btn-secondary btn-sm" onclick="adminResetPw(${u.id},'${esc(u.username)}')">🔑</button>
+            ${u.id !== state.users.find(x => x.username === state.user.username)?.id ? `<button class="btn-danger btn-sm" onclick="adminDelUser(${u.id})">✕</button>` : ""}
+          </div>
+        </div>
+      `).join("")}
+    `;
+  }
+
+  return `
+    <button class="back-btn" onclick="state.view='home';render()">← Zurück</button>
+    <h2 class="section">Verwaltung</h2>
+    ${tabs}
+    ${content}
+  `;
+}
+
+async function adminAddPlayer() {
+  const inp = document.getElementById("admin-player");
+  const name = inp.value.trim();
+  if (!name) return;
+  const res = await api("POST", "/api/players", { name });
+  if (res?.id) { state.players.push(res); inp.value = ""; render(); }
+  else if (res?.error) await showAlert(res.error, "Fehler");
+}
+
+async function adminDelPlayer(id) {
+  if (!await showConfirm("Spieler löschen", "Diesen Spieler wirklich löschen?")) return;
+  await api("DELETE", `/api/players/${id}`);
+  state.players = state.players.filter(p => p.id !== id);
+  render();
+}
+
+async function adminAddUser() {
+  const u = document.getElementById("new-username").value.trim();
+  const p = document.getElementById("new-userpass").value;
+  const a = document.getElementById("new-useradmin").checked;
+  if (!u || !p) { await showAlert("Username und Passwort erforderlich.", "Hinweis"); return; }
+  const res = await api("POST", "/api/users", { username: u, password: p, isAdmin: a });
+  if (res?.id) { state.users.push({ id: res.id, username: u, is_admin: res.is_admin, created_at: new Date().toISOString() }); render(); }
+  else if (res?.error) await showAlert(res.error, "Fehler");
+}
+
+async function adminDelUser(id) {
+  if (!await showConfirm("Benutzer löschen", "Diesen Benutzer wirklich löschen?")) return;
+  await api("DELETE", `/api/users/${id}`);
+  state.users = state.users.filter(u => u.id !== id);
+  render();
+}
+
+async function adminResetPw(id, name) {
+  const pw = await showPrompt(`Neues Passwort für ${name}`, "Neues Passwort");
+  if (!pw) return;
+  await api("PUT", `/api/users/${id}/password`, { password: pw });
+  await showAlert("Passwort wurde geändert.", "Erfolg");
+}
+
+function esc(s) { if (!s) return ""; const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+# Skyjo Rechner - Caddy Config Snippet
+# Add this to your existing Caddyfile alongside your other services
+#
+# skyjo.lfnlabs.de {
+#     reverse_proxy skyjo:3000
+# }
+#
+# Or if using host networking with port mapping:
+#
+# skyjo.lfnlabs.de {
+#     reverse_proxy localhost:3200
+# }

@@ -59,7 +59,7 @@ export default function GamePage() {
         <p className="text-xs font-semibold text-stone-400 uppercase tracking-wide mb-3">Zwischenstand</p>
         {sorted.map((p, i) => {
           const ci = players.indexOf(p)
-          const w = Math.min(Math.max((totals[p.id] / 100) * 100, 3), 100)
+          const w = totals[p.id] <= 0 ? 0 : Math.min((totals[p.id] / 100) * 100, 100)
           return (
             <div key={p.id} className="flex items-center gap-3 mb-3 last:mb-0">
               <span className="text-xs font-bold text-stone-300 w-4 text-center">{i + 1}</span>
@@ -106,7 +106,6 @@ export default function GamePage() {
               <span className="flex-1 text-sm font-medium">{p.name}</span>
               <input
                 type="number"
-                inputMode="numeric"
                 value={scores[p.id] ?? ''}
                 onChange={e => setScores(s => ({ ...s, [p.id]: e.target.value }))}
                 placeholder="—"
@@ -138,8 +137,18 @@ export default function GamePage() {
                   <tr key={i} className="border-b border-stone-50">
                     <td className="py-1.5 px-1 text-stone-400">{i + 1}</td>
                     {players.map(p => (
-                      <td key={p.id} className={`py-1.5 px-1 text-right font-medium ${r.enderId === p.id && r.doubled ? 'text-red-500' : ''}`}>
-                        {r.scores[p.id]}{r.enderId === p.id ? (r.doubled ? ' ⚡' : ' 🏁') : ''}
+                      <td key={p.id} className="py-1.5 px-1 text-right font-medium">
+                        {r.enderId === p.id && r.doubled ? (
+                          <span className="inline-flex items-center justify-end gap-1">
+                            <span>{r.scores[p.id] / 2}</span>
+                            <span className="text-xs font-bold bg-red-100 text-red-600 rounded px-1 py-0.5 leading-none">×2</span>
+                          </span>
+                        ) : (
+                          <span>
+                            {r.scores[p.id]}
+                            {r.enderId === p.id && <span className="ml-0.5 text-stone-300 text-xs">🏁</span>}
+                          </span>
+                        )}
                       </td>
                     ))}
                   </tr>

@@ -150,6 +150,21 @@ app.put("/api/users/:id/password", requireAuth, requireAdmin, (req, res) => {
   db.prepare("UPDATE users SET password = ? WHERE id = ?").run(bcrypt.hashSync(password, 10), req.params.id);
   res.json({ ok: true });
 });
+app.put("/api/users/:id/admin", requireAuth, requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  if (id === req.session.userId) return res.status(400).json({ error: "Eigenen Admin-Status nicht änderbar" });
+  const { isAdmin } = req.body;
+  db.prepare("UPDATE users SET is_admin = ? WHERE id = ?").run(isAdmin ? 1 : 0, id);
+  res.json({ ok: true });
+});
+app.put("/api/users/:id/username", requireAuth, requireAdmin, (req, res) => {
+  const { username } = req.body;
+  if (!username) return res.status(400).json({ error: "Username erforderlich" });
+  try {
+    db.prepare("UPDATE users SET username = ? WHERE id = ?").run(username.trim(), req.params.id);
+    res.json({ ok: true });
+  } catch (e) { res.status(409).json({ error: "Username existiert bereits" }); }
+});
 
 // ── Player Management ──
 app.get("/api/players", requireAuth, (req, res) => {

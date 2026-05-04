@@ -72,13 +72,13 @@ export default function AnalyticsPage() {
       {/* Bar chart */}
       <div className="card">
         <p className="text-xs font-semibold text-stone-400 uppercase tracking-wide mb-4">📊 Ø Punkte pro Spiel</p>
-        <div className="flex items-end gap-2 h-36">
+        <div className="flex items-end gap-2" style={{ height: '140px' }}>
           {lb.map((p, i) => (
-            <div key={p.name} className="flex-1 flex flex-col items-center gap-1">
+            <div key={p.name} className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
               <span className="text-xs font-semibold text-stone-700">{p.avg}</span>
               <div
-                className="w-full rounded-t-md min-h-1 transition-all"
-                style={{ height: `${Math.max((p.avg / maxAvg) * 100, 4)}%`, background: COLORS[i % COLORS.length] }}
+                className="w-full rounded-t-md transition-all"
+                style={{ height: `${Math.max((p.avg / maxAvg) * 100, 4)}px`, background: COLORS[i % COLORS.length] }}
               />
               <span className="text-xs text-stone-400 truncate w-full text-center">{p.name}</span>
             </div>

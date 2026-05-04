@@ -21,7 +21,6 @@ export default function GamePage() {
   const players = activeGame?.players ?? []
   const totals = useTotals(players, rounds)
   const sorted = [...players].sort((a, b) => totals[a.id] - totals[b.id])
-  const maxPts = Math.max(...Object.values(totals), 1)
   const gameOver = sorted.some(p => totals[p.id] >= 100)
 
   const submitRound = async () => {
@@ -60,7 +59,7 @@ export default function GamePage() {
         <p className="text-xs font-semibold text-stone-400 uppercase tracking-wide mb-3">Zwischenstand</p>
         {sorted.map((p, i) => {
           const ci = players.indexOf(p)
-          const w = Math.max((totals[p.id] / maxPts) * 100, 3)
+          const w = Math.min(Math.max((totals[p.id] / 100) * 100, 3), 100)
           return (
             <div key={p.id} className="flex items-center gap-3 mb-3 last:mb-0">
               <span className="text-xs font-bold text-stone-300 w-4 text-center">{i + 1}</span>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
 import { api } from '../lib/api'
 import { useApp } from '../App'
 
@@ -6,6 +7,7 @@ export default function LoginPage() {
   const { setUser, setView, loadData } = useApp()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [showPw, setShowPw] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -34,15 +36,25 @@ export default function LoginPage() {
             autoComplete="username"
             maxLength={64}
           />
-          <input
-            className="input mb-5"
-            type="password"
-            placeholder="Passwort"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            autoComplete="current-password"
-            maxLength={128}
-          />
+          <div className="relative mb-5">
+            <input
+              className="input pr-11"
+              type={showPw ? 'text' : 'password'}
+              placeholder="Passwort"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              autoComplete="current-password"
+              maxLength={128}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPw(v => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+              tabIndex={-1}
+            >
+              {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
           <button type="submit" disabled={loading} className="btn btn-primary btn-lg">
             {loading ? 'Anmelden…' : 'Anmelden'}
           </button>
